@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Casa de Apoio</title>
+    <style>
+       body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #eef2f7;  /* Fundo suave */
+    margin: 0;
+    padding: 0;
+    color: #333;  /* Cor de texto mais suave para leitura */
+}
+
+.container {
+    width: 85%;
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: #ffffff; /* Fundo branco para destacar o conteúdo */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); /* Sombra suave para destaque */
+}
+
+h1 {
+    text-align: center;
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.user-info {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #555;
+}
+
+.user-info p {
+    margin: 12px 0;
+    font-weight: 500;
+}
+
+.back-btn {
+    display: block;
+    margin-top: 30px;
+    text-align: center;
+    font-size: 18px;
+    color: #3498db;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    text-decoration: underline;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    border-bottom: 3px solid #3498db; /* Linha de separação azul */
+}
+
+.tab {
+    padding: 15px 25px;
+    cursor: pointer;
+    font-size: 18px;
+    background-color: #ecf0f1;
+    border-radius: 6px;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 0 10px;
+}
+
+.tab:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-3px);
+}
+
+.tab-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.active-tab {
+    background-color: #3498db;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.active-content {
+    display: block;
+}
+
+.medicamentos {
+    margin-top: 30px;
+}
+
+.medicamentos table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+.medicamentos th, .medicamentos td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.medicamentos th {
+    background-color: #ecf0f1;
+    color: #3498db;
+    font-weight: bold;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    color: #333;
+}
+
+.form-group button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 18px;
+    transition: background-color 0.3s;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.form-group button:hover {
+    background-color: #2980b9;
+}
+
+.remover-btn {
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+.remover-btn:hover {
+    color: #c0392b;
+}
+
+.info-list {
+    margin-top: 30px;
+}
+
+.info-list div {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+#cid-section input, .form-group textarea {
+    background-color: #f4f6f8;
+}
+
+#cid-btn-section button {
+    background-color: #27ae60;
+    border-radius: 6px;
+}
+
+#cid-btn-section button:hover {
+    background-color: #2ecc71;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>(PAI) Casa de Apoio</h1>
+        
+        <div class="tabs">
+            <div class="tab active-tab" onclick="openTab('casa')">Informações do paciente</div>
+            <div class="tab" onclick="openTab('medicamentos')">Medicamentos</div>
+        </div>
+
+        <div id="casa" class="tab-content active-content">
+            <h2>Informações do paciente</h2>
+            <div class="user-info">
+                <p><strong>Nome:</strong> {{ user.nome }}</p>
+                <p><strong>ID:</strong> {{ user.id }}</p>
+                <p><strong>CPF:</strong> {{ user.cpf }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ user.data_nascimento }}</p>
+                <p><strong>Estado Civil:</strong> {{ user.estado_civil }}</p>
+                <p><strong>Sexo:</strong> {{ user.sexo }}</p>
+                <p><strong>Nome do Responsável:</strong> {{ user.nome_responsavel }}</p>
+                <p><strong>Telefone do Responsável:</strong> {{ user.telefone_responsavel }}</p>
+                <!-- CID com persistência -->
+                <p><strong>CID:</strong> <span id="cid-display">{{ user.cid | default(0) }}</span></p>
+            </div>
+
+            <div class="form-group">
+                <label for="informacao-casa">Relatórios:</label>
+                <textarea id="informacao-casa" placeholder="Adicionar Relatórios sobre o paciente"></textarea>
+            </div>
+
+            <div class="form-group" id="cid-section">
+                <label for="cid">Código CID:</label>
+                <input type="text" id="cid" placeholder="Digite o CID do paciente (Exemplo: A01.0)" value="F.20.1">
+            </div>
+            
+            <div class="form-group" id="cid-btn-section">
+                <button onclick="adicionarCid()">Adicionar CID</button>
+            </div>
+            
+            
+
+            <div class="form-group">
+                <button onclick="adicionarInformacao('casa')">Enviar Relatório</button>
+            </div>
+
+            <div class="info-list" id="info-casa">
+                <!-- As informações da Casa de Apoio serão exibidas aqui -->
+            </div>
+        </div>
+
+        <div id="medicamentos" class="tab-content">
+            <h2>Medicamentos</h2>
+            
+            <div class="form-group">
+                <label for="nome-medicamento">Nome do medicamento:</label>
+                <input type="text" id="nome-medicamento" placeholder="Nome do medicamento">
+            </div>
+
+            <div class="form-group">
+                <label for="quantidade">Quantidade (mg):</label>
+                <input type="number" id="quantidade" placeholder="Quantidade em miligramas">
+            </div>
+
+            <div class="form-group">
+                <button onclick="adicionarMedicamento()">Adicionar Medicamento</button>
+            </div>
+
+            <table class="medicamentos">
+                <thead>
+                    <tr>
+                        <th>Nome do Medicamento</th>
+                        <th>Quantidade (mg)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="medicamentos-list">
+                    <!-- Medicamentos adicionados serão listados aqui -->
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/" class="back-btn">Voltar para o login</a>
+    </div>
+
+    <script>
+        // Função para abrir as abas
+        function openTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active-content'));
+
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(tab => tab.classList.remove('active-tab'));
+
+            document.getElementById(tabName).classList.add('active-content');
+            document.querySelector('.tab.' + tabName).classList.add('active-tab');
+        }
+
+        // Função para adicionar o CID e persistir
+        function adicionarCid() {
+            const cid = document.getElementById("cid").value;
+
+            if (!cid) {
+                alert("Por favor, insira o CID.");
+                return;
+            }
+
+            // Armazene o CID no localStorage
+            localStorage.setItem('cid', cid);
+
+            // Atualize o CID na interface
+            document.getElementById("cid-display").textContent = cid;
+
+            // Esconda os campos de CID e o botão "Adicionar CID"
+            document.getElementById("cid-section").style.display = 'none';
+            document.getElementById("cid-btn-section").style.display = 'none';
+        }
+
+        // Função para carregar o CID do localStorage ao carregar a página
+        // Função para carregar o CID do localStorage ao carregar a página
+// Função para carregar o CID do localStorage ao carregar a página
+function carregarCid() {
+    const cid = localStorage.getItem('cid'); // Verifica se o CID está salvo no localStorage
+    
+    // Se o CID foi armazenado anteriormente, exibe o valor
+    if (cid) {
+        document.getElementById("cid-display").textContent = cid;
+        document.getElementById("cid-section").style.display = 'none';  // Esconde o campo de entrada CID
+        document.getElementById("cid-btn-section").style.display = 'none';  // Esconde o botão "Adicionar CID"
+    } else {
+        // Caso contrário, mantém o CID vazio e visível
+        document.getElementById("cid-display").textContent = 'Não cadastrado'; // Exibe "Não cadastrado" caso não haja CID
+        document.getElementById("cid-section").style.display = 'block'; // Exibe o campo de entrada CID
+        document.getElementById("cid-btn-section").style.display = 'block'; // Exibe o botão "Adicionar CID"
+    }
+}
+
+// Função para adicionar o CID e persistir
+function adicionarCid() {
+    const cid = document.getElementById("cid").value; // Captura o valor digitado no campo CID
+
+    // Verifica se o campo CID está vazio
+    if (!cid) {
+        alert("Por favor, insira o CID.");
+        return;
+    }
+
+    // Armazena o CID no localStorage
+    localStorage.setItem('cid', cid);
+
+    // Atualiza o CID na interface
+    document.getElementById("cid-display").textContent = cid;
+
+    // Esconde os campos de CID e o botão "Adicionar CID"
+    document.getElementById("cid-section").style.display = 'none';
+    document.getElementById("cid-btn-section").style.display = 'none';
+}
+
+// Função chamada ao carregar a página para garantir que o CID seja carregado corretamente
+window.onload = function() {
+    carregarCid(); // Chama a função de carregamento do CID
+};
+
+// Função para adicionar o CID e persistir
+function adicionarCid() {
+    const cid = document.getElementById("cid").value;
+
+    if (!cid) {
+        alert("Por favor, insira o CID.");
+        return;
+    }
+
+    // Armazena o CID no localStorage
+    localStorage.setItem('cid', cid);
+
+    // Atualiza o CID na interface
+    document.getElementById("cid-display").textContent = cid;
+
+    // Esconde os campos de CID e o botão "Adicionar CID"
+    document.getElementById("cid-section").style.display = 'none';
+    document.getElementById("cid-btn-section").style.display = 'none';
+}
+
+// Função chamada ao carregar a página para garantir que o CID seja carregado corretamente
+window.onload = function() {
+    carregarCid();
+};
+
+
+        // Função para adicionar medicamento
+        function adicionarMedicamento() {
+            const nomeMedicamento = document.getElementById("nome-medicamento").value;
+            const quantidade = document.getElementById("quantidade").value;
+
+            if (!nomeMedicamento || !quantidade) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            const medicamentos = JSON.parse(localStorage.getItem('medicamentos')) || [];
+            medicamentos.push({ nome: nomeMedicamento, quantidade: quantidade });
+            localStorage.setItem('medicamentos', JSON.stringify(medicamentos));
+
+            document.getElementById("nome-medicamento").value = "";
+            document.getElementById("quantidade").value = "";
+
+            carregarMedicamentos();
+        }
+
+        // Função para carregar medicamentos do localStorage
+        function carregarMedicamentos() {
+            const medicamentos = JSON.parse(localStorage.getItem('medicamentos')) || [];
+            const medicamentosList = document.getElementById("medicamentos-list");
+            medicamentosList.innerHTML = "";
+
+            medicamentos.forEach((medicamento, index) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${medicamento.nome}</td>
+                    <td>${medicamento.quantidade} mg</td>
+                    <td><button class="remover-btn" onclick="removerMedicamento(${index})">Remover</button></td>
+                `;
+                medicamentosList.appendChild(tr);
+            });
+        }
+
+        // Função para remover medicamento
+        function removerMedicamento(index) {
+            const medicamentos = JSON.parse(localStorage.getItem('medicamentos')) || [];
+            medicamentos.splice(index, 1);
+            localStorage.setItem('medicamentos', JSON.stringify(medicamentos));
+            carregarMedicamentos();
+        }
+
+        // Função para adicionar informações sobre o paciente
+        function adicionarInformacao(tipo) {
+            let informacao = '';
+            let cid = '';
+            if (tipo === 'casa') {
+                informacao = document.getElementById("informacao-casa").value;
+                cid = document.getElementById("cid").value;
+
+               
+
+                let infoCasa = JSON.parse(localStorage.getItem('infoCasa')) || [];
+                infoCasa.push({ informacao: informacao, cid: cid });
+                localStorage.setItem('infoCasa', JSON.stringify(infoCasa));
+
+                document.getElementById("informacao-casa").value = "";
+                document.getElementById("cid").value = "";
+                exibirInformacoes('casa');
+            }
+        }
+
+        // Função para exibir informações armazenadas
+        function exibirInformacoes(tipo) {
+            let infoContainer = '';
+            if (tipo === 'casa') {
+                infoContainer = document.getElementById("info-casa");
+                const infoCasa = JSON.parse(localStorage.getItem('infoCasa')) || [];
+                infoContainer.innerHTML = '';
+                infoCasa.forEach((item, index) => {
+                    const div = document.createElement("div");
+                    div.innerHTML = `<strong>CID:</strong> ${item.cid} - ${item.informacao}`;
+                    const removeBtn = document.createElement("span");
+                    removeBtn.textContent = " Remover";
+                    removeBtn.classList.add("remover-btn");
+                    removeBtn.onclick = function() {
+                        removerInformacao(index);
+                    };
+
+                    div.appendChild(removeBtn);
+                    infoContainer.appendChild(div);
+                });
+            }
+        }
+
+        // Função para remover informação
+        function removerInformacao(index) {
+            let infoCasa = JSON.parse(localStorage.getItem('infoCasa')) || [];
+            infoCasa.splice(index, 1);
+            localStorage.setItem('infoCasa', JSON.stringify(infoCasa));
+            exibirInformacoes('casa');
+        }
+
+        // Chama a função de carregar o CID ao carregar a página
+        window.onload = function() {
+            carregarCid();
+            carregarMedicamentos();
+            exibirInformacoes('casa');
+        };
+    </script>
+</body>
+</html>

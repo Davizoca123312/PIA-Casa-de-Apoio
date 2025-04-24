@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuário - Admin</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .admin-header p {
+            color: #7f8c8d;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background-color: #fdecea;
+            color: var(--error-color);
+            border: 1px solid #f5b7b1;
+        }
+        
+        .alert-success {
+            background-color: #e8f8f0;
+            color: var(--success-color);
+            border: 1px solid #a3e4bf;
+        }
+        
+        .cpf-status {
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .valid {
+            color: var(--success-color);
+        }
+        
+        .invalid {
+            color: var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Registrar Novo Usuário</h1>
+            <p>Área restrita - Administrador</p>
+        </div>
+        
+        <div id="alertBox" class="alert" role="alert"></div>
+        
+        <form id="registerForm" method="POST" action="/admin/register">
+            <div class="form-group">
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" class="form-control" placeholder="Digite apenas números" required>
+                <div id="cpfStatus" class="cpf-status"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" name="nome" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="data_nascimento">Data de Nascimento</label>
+                <input type="date" id="data_nascimento" name="data_nascimento" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="estado_civil">Estado Civil</label>
+                <select id="estado_civil" name="estado_civil" class="form-control" required>
+                    <option value="">Selecione...</option>
+                    <option value="solteiro">Solteiro(a)</option>
+                    <option value="casado">Casado(a)</option>
+                    <option value="divorciado">Divorciado(a)</option>
+                    <option value="viuvo">Viúvo(a)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" class="form-control">
+                    <option value="">Selecione...</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="nome_responsavel">Nome do Responsável</label>
+                <input type="text" id="nome_responsavel" name="nome_responsavel" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="telefone_responsavel">Telefone do Responsável</label>
+                <input type="text" id="telefone_responsavel" name="telefone_responsavel" class="form-control">
+            </div>
+            
+            
+
+            <button type="submit" class="btn" id="submitBtn">Cadastrar Usuário</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cpfInput = document.getElementById('cpf');
+            const cpfStatus = document.getElementById('cpfStatus');
+            const registerForm = document.getElementById('registerForm');
+            const alertBox = document.getElementById('alertBox');
+            
+            // Máscara para CPF
+            cpfInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+                
+                // Validação em tempo real
+                if (value.length === 11) {
+                    validateCPF(value);
+                } else {
+                    cpfStatus.style.display = 'none';
+                }
+            });
+            
+            // Validação do CPF
+            function validateCPF(cpf) {
+                // Validação matemática básica (implementação simplificada)
+                if (!isValidCPF(cpf)) {
+                    cpfStatus.textContent = 'CPF inválido';
+                    cpfStatus.className = 'cpf-status invalid';
+                    cpfStatus.style.display = 'block';
+                    return false;
+                }
+                
+                cpfStatus.textContent = 'CPF válido';
+                cpfStatus.className = 'cpf-status valid';
+                cpfStatus.style.display = 'block';
+                return true;
+            }
+            
+            // Função simplificada de validação de CPF
+            function isValidCPF(cpf) {
+                if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+                
+                let sum = 0;
+                for (let i = 0; i < 9; i++) {
+                    sum += parseInt(cpf.charAt(i)) * (10 - i);
+                }
+                let remainder = 11 - (sum % 11);
+                let digit1 = remainder >= 10 ? 0 : remainder;
+                
+                sum = 0;
+                for (let i = 0; i < 10; i++) {
+                    sum += parseInt(cpf.charAt(i)) * (11 - i);
+                }
+                remainder = 11 - (sum % 11);
+                let digit2 = remainder >= 10 ? 0 : remainder;
+                
+                return digit1 === parseInt(cpf.charAt(9)) && 
+                       digit2 === parseInt(cpf.charAt(10));
+            }
+            
+            // Envio do formulário
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processando...';
+                
+                const cpf = cpfInput.value.trim();
+                if (!validateCPF(cpf)) {
+                    showAlert('Por favor, insira um CPF válido', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Cadastrar Usuário';
+                    return;
+                }
+                
+                // Envio dos dados
+                try {
+                    const formData = new FormData(registerForm);
+                    const response = await fetch('/admin/register', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showAlert('Usuário cadastrado com sucesso!', 'success');
+                        registerForm.reset();
+                    } else {
+                        showAlert(result.message || 'Erro ao cadastrar usuário', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Erro na conexão com o servidor', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Cadastrar Usuário';
+                }
+            });
+            
+            function showAlert(message, type) {
+                alertBox.textContent = message;
+                alertBox.className = `alert alert-${type}`;
+                alertBox.style.display = 'block';
+                
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
