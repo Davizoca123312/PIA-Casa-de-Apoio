@@ -1,7 +1,6 @@
 # Rotas principais da aplicação
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
-from app.models.user_model import db, User, Medicamento, Sobre, Cid  # Ajuste conforme a nova estrutura
-from database import insert_user, get_user_by_cpf
+from app.models.user_model import db, User, Medicamento, Sobre, Cid
 
 main_routes = Blueprint('main', __name__)
 
@@ -42,7 +41,7 @@ def logar():
     cpf = cpf.replace(".", "").replace("-", "")
     if not is_valid_cpf(cpf):
         return jsonify({"error": "CPF inválido"}), 400
-    user = get_user_by_cpf(cpf)
+    user = User.query.filter_by(cpf=cpf).first()
     if user:
         return jsonify({"message": "Login realizado com sucesso!"}), 200
     else:
@@ -54,7 +53,7 @@ def main_page():
     cpf = request.args.get('cpf')
     if not cpf or not is_valid_cpf(cpf):
         return redirect(url_for('main.get0'))
-    user = get_user_by_cpf(cpf)
+    user = User.query.filter_by(cpf=cpf).first()
     if not user:
         return redirect(url_for('main.get0'))
     return render_template("main.html", user=user)
@@ -74,7 +73,17 @@ def register_admin():
     if not is_valid_cpf(cpf):
         return jsonify({"error": "CPF inválido"}), 400
     try:
-        insert_user(cpf, nome, data_nascimento, estado_civil, sexo, nome_responsavel, telefone_responsavel)
+        novo_user = User(
+            cpf=cpf,
+            nome=nome,
+            data_nascimento=data_nascimento,
+            estado_civil=estado_civil,
+            sexo=sexo,
+            nome_responsavel=nome_responsavel,
+            telefone_responsavel=telefone_responsavel
+        )
+        db.session.add(novo_user)
+        db.session.commit()
         return jsonify({"message": "Usuário cadastrado com sucesso!"}), 201
     except Exception as e:
         return jsonify({"error": f"Erro ao registrar o usuário: {e}"}), 500

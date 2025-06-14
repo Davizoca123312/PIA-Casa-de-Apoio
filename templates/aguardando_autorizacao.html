@@ -8,6 +8,23 @@
         .box { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; display: inline-block; padding: 40px 60px; }
         .loading { font-size: 2em; color: #3498db; margin-bottom: 20px; }
     </style>
+    <script>
+        // Polling para verificar se o acesso foi liberado
+        const token = '{{ token }}';
+        setInterval(function() {
+            fetch('/admin/check_autorizacao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.autorizado) {
+                    window.location.href = '/admin/logins';
+                }
+            });
+        }, 2000); // Verifica a cada 2 segundos
+    </script>
 </head>
 <body>
     <div class="box">
