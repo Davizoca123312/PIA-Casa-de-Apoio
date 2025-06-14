@@ -1,0 +1,23 @@
+[project]
+name = "pia-casa-de-apoio"
+version = "1.0.0"
+description = "Sistema web Flask para gerenciamento de pacientes em Casa de Apoio."
+authors = [
+    { name = "Davi VBR", email = "email@gmail.com" }
+]
+requires-python = ">=3.11"
+
+[project.dependencies]
+Flask = "^3.0.3"
+Flask-SQLAlchemy = "^3.1.1"
+gunicorn = "*"
+pytest = "*"
+python-dotenv = "*"
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

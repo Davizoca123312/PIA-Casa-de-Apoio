@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
 from app.models.user_model import db, User
 import smtplib
@@ -13,23 +14,14 @@ pending_auths = {}
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_USER = 'fornute3@gmail.com'
-EMAIL_PASS = 'rpny eeph muzr blow'
-EMAIL_TO = 'fornute3@gmail.com'
-
-# URL da logo (pode trocar por uma imagem do seu projeto)
+EMAIL_USER = os.environ['EMAIL_USER']
+EMAIL_PASS = os.environ['EMAIL_PASS']
+EMAIL_TO = os.environ['EMAIL_TO']
 LOGO_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/512px-React-icon.svg.png'
 
-# Função para enviar e-mail de alerta profissional
-def notify_admin_email(ip, token):
-    if not (EMAIL_USER and EMAIL_PASS and EMAIL_TO):
-        print('E-mail não configurado corretamente.')
-        return
-    subject = 'Tentativa de acesso à página de logins (admin)'
-    now = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-    # Link para autorizar (ajuste o domínio se não for localhost)
-    autorizar_url = f"http://localhost:5000/admin/autorizar_logins?token={token}"
-    html = f'''
+def build_admin_email_html(ip, now, autorizar_url):
+    """Responsável apenas por montar o HTML do e-mail."""
+    return f'''
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:auto;border:1px solid #eee;border-radius:8px;box-shadow:0 2px 8px #ccc;padding:32px 24px;background:#fafbfc;">
         <div style="text-align:center;margin-bottom:24px;">
             <img src="{LOGO_URL}" alt="Logo" style="width:80px;height:80px;">
@@ -46,6 +38,9 @@ def notify_admin_email(ip, token):
         <p style="color:#888;font-size:0.95em;text-align:center;">Se não foi você, ignore este e-mail.</p>
     </div>
     '''
+
+def send_email(subject, html):
+    """Responsável apenas por enviar o e-mail."""
     msg = MIMEMultipart('alternative')
     msg['From'] = EMAIL_USER
     msg['To'] = EMAIL_TO
@@ -59,6 +54,16 @@ def notify_admin_email(ip, token):
         server.quit()
     except Exception as e:
         print(f'Erro ao enviar e-mail: {e}')
+
+def notify_admin_email(ip, token):
+    if not (EMAIL_USER and EMAIL_PASS and EMAIL_TO):
+        print('E-mail não configurado corretamente.')
+        return
+    subject = 'Tentativa de acesso à página de logins (admin)'
+    now = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    autorizar_url = f"http://localhost:5000/admin/autorizar_logins?token={token}"
+    html = build_admin_email_html(ip, now, autorizar_url)
+    send_email(subject, html)
 
 # Rota protegida para visualizar logins
 @admin_routes.route('/admin/logins')

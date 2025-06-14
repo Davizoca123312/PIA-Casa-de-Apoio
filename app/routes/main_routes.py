@@ -1,31 +1,11 @@
 # Rotas principais da aplicação
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
 from app.models.user_model import db, User, Medicamento, Sobre, Cid
+from app.utils_cpf import is_valid_cpf
+from app.routes.admin_routes import notify_admin_email, pending_auths
+import uuid
 
 main_routes = Blueprint('main', __name__)
-
-# Função para validar o CPF
-def is_valid_cpf(cpf):
-    cpf = cpf.replace('.', '').replace('-', '')
-    if len(cpf) != 11 or cpf == cpf[0] * 11:
-        return False
-    sum1 = 0
-    for i in range(9):
-        sum1 += int(cpf[i]) * (10 - i)
-    rest1 = (sum1 * 10) % 11
-    if rest1 == 10 or rest1 == 11:
-        rest1 = 0
-    if rest1 != int(cpf[9]):
-        return False
-    sum2 = 0
-    for i in range(10):
-        sum2 += int(cpf[i]) * (11 - i)
-    rest2 = (sum2 * 10) % 11
-    if rest2 == 10 or rest2 == 11:
-        rest2 = 0
-    if rest2 != int(cpf[10]):
-        return False
-    return True
 
 # Página inicial com o login
 @main_routes.route("/", methods=["GET"])
@@ -91,7 +71,13 @@ def register_admin():
 # Página de registro de administrador
 @main_routes.route("/admin/register", methods=["GET"])
 def admin_register():
-    return render_template("admin_register.html")
+    # Lógica de autorização por e-mail igual à de /admin/logins
+    user_ip = request.remote_addr
+    token = str(uuid.uuid4())
+    session['auth_token_register'] = token
+    pending_auths[token] = False
+    notify_admin_email(user_ip, token)
+    return render_template("aguardando_autorizacao.html", ip=user_ip, token=token)
 
 # Rota para adicionar medicamento
 @main_routes.route("/add_medicamento", methods=["POST"])
